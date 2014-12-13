@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html ng-app="APP">
+<head>
+  <meta charset="UTF-8">
+  <title>angular-dragdrop example</title>
+  <style>
+	li:hover{background-color: #eee;}
+	</style>
+</head>
+<body ng-controller="ExampleController">
+  <h2>Drag from one group to another</h2>
+  <table>
+	<tr>
+	  <td width="250"><b>Group #1</b></td>
+	  <td width="250"><b>Group #2</b></td>
+	  </tr>
+	<tr>
+	  <td valign="top">
+		<ul ui-on-Drop="onDrop($event,$data,men)">
+		  <li ui-draggable="true" drag="man" 
+			  on-drop-success="dropSuccessHandler($event,$index,men)"
+			  ng-repeat="man in men track by $index">
+			{{man}}
+			</li>
+		  </ul>
+		</td>
+	  <td valign="top">
+		<ul ui-on-Drop="onDrop($event,$data,women)">
+		  <li ui-draggable="true" drag="woman" 
+			  on-drop-success="dropSuccessHandler($event,$index,women)"
+			  ng-repeat="woman in women track by $index">
+			{{woman}}
+			</li>
+		  </ul>
+		</td>
+	  </tr>
+	</table>
+  <script src="angular.min.js"></script>
+  <script src="dragAndDrop.js"></script>
+  <script>
+	angular.module("APP",["ngDragDrop"]).
+	controller("ExampleController",['$scope',function($scope){
+	$scope.men = ['John','Jack','Mark','Ernie'];
+	$scope.women = ['Jane','Jill','Betty','Mary'];
+	$scope.dropSuccessHandler = function($event,index,array){
+	array.splice(index,1);
+	};
+	$scope.onDrop = function($event,$data,array){
+	array.push($data);
+	};
+	}])
+	</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html ng-app="APP">
+<head>
+  <meta charset="UTF-8">
+  <title>mlApp</title>
+  <style>
+	li:hover{background-color: #eee;}
+	</style>
+</head>
+<body ng-controller="ExampleController">
+  <h2>Drag items and create your own machine learning architecture</h2>
+  <table>
+	<tr>
+	  <td width="250"><b>Items</b></td>
+	  <td width="250"><b>System</b></td>
+	  </tr>
+	<tr>
+	  <td valign="top">
+		<ul ui-on-Drop="onDrop($event,$data,items)">
+		  <li ui-draggable="true" drag="item" 
+			  on-drop-success="dropSuccessHandler($event,$index,items)"
+			  ng-repeat="item in items track by $index">
+			{{item}}
+			</li>
+		  </ul>
+		</td>
+	  <td valign="top">
+		<ul ui-on-Drop="onDrop($event,$data,systems)">
+		  <li ui-draggable="true" drag="system" 
+			  on-drop-success="dropSuccessHandler($event,$index,systems)"
+			  ng-repeat="system in systems track by $index">
+			{{system}}
+			</li>
+		  </ul>
+		</td>
+	  </tr>
+	</table>
+  <script src="angular.min.js"></script>
+  <script src="dragAndDrop.js"></script>
+  <script>
+	angular.module("APP",["ngDragDrop"]).
+	controller("ExampleController",['$scope',function($scope){
+	$scope.items = ['knn','k-means','SVM'];
+	$scope.systems = ['source'];
+	$scope.dropSuccessHandler = function($event,index,array){
+	array.splice(index,1);
+	};
+	$scope.onDrop = function($event,$data,array){
+	array.push($data);
+	};
+	}])
+	</script>
+</body>
+</html>
