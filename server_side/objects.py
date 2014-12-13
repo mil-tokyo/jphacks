@@ -5,43 +5,46 @@ import matplotlib.pyplot as plt
 
 class Objects():
     def __init__(self, json_objects):
-        self.objects = {}
+        """ self.objects is dictionary
+        key : name of module
+        val : instance of class Data or Model or Visualizer
+        """
+        self.objects_dict = {}
+
+        """ initialize objects dicitionary """
         for obj in json_objects:
-            obj_type = obj['type']        
-            if obj_type == "data":
-                self.objects[obj['name']] = Data(obj)
-            elif obj_type == "model":
-                self.objects[obj['name']] = Model(obj)
-            elif obj_type == "visualize":
-                self.objects[obj['name']] = Visualizer(obj)
-
-
+            obj_type = obj['type']
+            self.objects_dict[obj['name']] = eval(str(obj_type) + "(obj)")
+            
                        
     def calculate(self):
-        input_data = None
+        """where calculation will start"""
+        start_obj_list = [obj for obj in self.objects_dict.values() if obj.type == "Data"]
+        results = []
+        for obj in start_obj_list:
+            """initialize"""
+            input_data = None
+            output_obj_name = True
 
-        ########
-        #######
-        obj = self.objects['source1']
-        ######
-        ######
+            while 1:
+                result, output_obj_name = obj.calculate(input_data)
+
+                """ if calculation reach the end module """
+                if not output_obj_name:
+                    results.append(result)
+                    break
                 
-        output_obj = True
-        while 1:
-            print obj
-            result, output_obj = obj.calculate(input_data)
-            if not output_obj:
-                break
-            obj = self.objects[output_obj]
-            input_data = result
+                obj = self.objects_dict[output_obj_name]
+                input_data = result
 
-        return result
+        return results
     
     def __str__(self):
-        return "\n\n".join([str(obj) for obj in self.objects])
+        return "\n\n".join([str(obj) for obj in self.objects_dict])
 
 class Object(object):
     def __init__(self, json_object):
+        self.type = json_object["type"]
         self.name = json_object["name"]
         self.input = json_object["input"]
         self.output = json_object["output"]
@@ -54,22 +57,21 @@ class Object(object):
 class Model(Object):
     def __init__(self, json_object):
         super(Model, self).__init__(json_object)
-        self.model = KMeans(n_clusters=2)
+        model_type = json_object["model_type"]
+        params = json_object["params"]
+        self.model = eval(str(model_type)+"(**params)")
         
     def calculate(self, input_data):
-        print input_data
-        print input_data.shape
         self.model.fit(input_data)
         return {"data":input_data, "model" : self.model}, self.output 
 
-    
 class Visualizer(Object):
     def __init__(self, json_object):
         super(Visualizer, self).__init__(json_object)
         self.plot_range = [-10, 15, -10, 15]
         self.colors_list = ["r", "g"]
-        self.image_source = "./log/kmean.png"
-        
+        self.image_source = "./log/{}.png".format(self.name)
+                
     def calculate(self, input_data):
         self.data, self.model = input_data["data"], input_data["model"]
         y = self.model.predict(self.data)
