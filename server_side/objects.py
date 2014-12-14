@@ -60,13 +60,13 @@ class Object(object):
           .format("name", self.name, "input", self.input, "output", self.output)
 
 
-class Extractor(Object):
-    def __init__(self, json_object):
-        super(Model, self).__init__(json_object)
-        self.extractor = "Hog"
+# class Extractor(Object):
+#     def __init__(self, json_object):
+#         super(Model, self).__init__(json_object)
+#         self.extractor = "Hog"
 
-    def calculate(self, input_data):
-        input_data[]
+#     def calculate(self, input_data):
+#         input_data[]
         
         
 model_class_dict = {"KMeans" : "unsupervised", "SVC" : "classification", "LinearSVC" : "classification_demo", "LinearRegression" : "regression"}      
@@ -86,7 +86,7 @@ class Model(Object):
         if self.model_class == "unsupervised":
             self.model.fit(input_data["data"][:, 1:])
         elif self.model_class == "classification_demo":
-            
+            pass
             
         else:
             print input_data["data"][:, 0]
