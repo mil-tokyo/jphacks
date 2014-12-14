@@ -7,7 +7,7 @@ def get_data():
     cur = connection.cursor()
     sql = "SELECT queues.id, structures.json FROM structures LEFT JOIN queues ON structures.queue_id = queues.id WHERE queues.state = 0"
     results = cur.execute(sql)
-    queue_id, rows = cur.fetchall()[1]
+    queue_id, rows = cur.fetchall()[2]
     cur.close()
     connection.close()
     decoded_json = json.loads(rows)
