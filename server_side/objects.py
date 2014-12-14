@@ -132,7 +132,7 @@ class Visualizer(Object):
     def plot_data(self, mode):
         """plot data """
         n_labels = int(max(self.label)) + 1
-        plt.axis(self.plot_range)
+        #plt.axis(self.plot_range)
         if mode == "classification":
             for l in range(n_labels):
                 x_plot = self.data[self.label == l, :]
