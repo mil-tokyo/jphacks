@@ -109,7 +109,6 @@ class Visualizer(Object):
         plt.savefig(self.image_source)
         return {"name": self.name, "type": self.type, "data" : self.data.tolist(), "img_src" : self.image_source}, False
 
-
     def plot_func(self, mode):
         """ plot fucntions """
         x_min, x_max = np.min(self.data[:, 0]), np.max(self.data[:, 0])
@@ -117,12 +116,12 @@ class Visualizer(Object):
         if mode == "regression":
             axis_x = np.arange(x_min, x_max, 0.05)
             axis_y = [self.model.decision_function(np.array([x])) for x in axis_x]
-            plt.plot(axis_x, axis_y, "-"+self.colors_list[-1])
+            plt.plot(axis_x, axis_y, "-"+self.colors_list[1], linewidth=3)
 
         elif mode == "classification":
             axis_x = np.arange(x_min, x_max, 0.05)
             axis_y = -(self.model.intercept_[0] + self.model.coef_[0, 0] * axis_x) / self.model.coef_[0, 1]
-            plt.plot(axis_x, axis_y, "-"+self.colors_list[-1])
+            plt.plot(axis_x, axis_y, "-"+self.colors_list[-1], linewidth=3)
 
     def plot_data(self, mode):
         """plot data """
