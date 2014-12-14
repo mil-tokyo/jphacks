@@ -1,3 +1,4 @@
+import time
 import MySQLdb
 from objects import Objects
 import json
@@ -23,12 +24,29 @@ def put_data(queue_id, data):
     connection.commit()
     cur.close()
     connection.close()
-
+    
+def write_error(queue_id):
+    connection = MySQLdb.connect(host = "localhost", db = "jphacks", user = "jphacks", passwd = "jphacks")
+    cur = connection.cursor()
+    results = cur.execute("UPDATE queues SET state=10 WHERE id = %s "%(queue_id))
+    cur.close()
+    connection.close()
+    
 def main():
-    queue_id, decoded_json = get_data()
-    objects = Objects(decoded_json)
-    results = objects.calculate()
-    put_data(queue_id, results)
+    while 1:
+        try:
+            queue_id, decoded_json = get_data()
+        except:
+            time.sleep(0.5)
+            continue
+        
+        try:
+            objects = Objects(decoded_json)
+            results = objects.calculate()
+        except:
+            print "ERROR"
+            write_error(queue_id)
+        put_data(queue_id, results)
     
 if __name__ == "__main__":
     main()
