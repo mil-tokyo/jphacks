@@ -29,7 +29,7 @@ def sample_regression():
     y = x * 0.5 + 1
     noise = np.random.normal(size=(x.shape[0]), scale = 0.4)
     y += noise
-    f=open("sample_kmeans.csv","w")
+    f=open("sample_regression.csv","w")
     for i in range(x.shape[0]):
         f.write("{},{}\n".format(y[i], x[i]))
     f.close()
@@ -37,3 +37,4 @@ def sample_regression():
     
 sample_regression()
 sample_svm()
+sample_kmeans()
