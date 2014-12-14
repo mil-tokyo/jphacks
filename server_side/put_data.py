@@ -5,9 +5,9 @@ import json
 def get_data():
     connection = MySQLdb.connect(host = "localhost", db = "jphacks", user = "jphacks", passwd = "jphacks")
     cur = connection.cursor()
-    sql = "SELECT queues.id, structures.json FROM structures LEFT JOIN queues ON structures.queue_id = queues.id WHERE queues.state = 0"
+    sql = "SELECT queues.id, structures.json FROM structures LEFT JOIN queues ON structures.queue_id = queues.id WHERE queues.state = 0 ORDER BY queues.created_at ASC limit 1"
     results = cur.execute(sql)
-    queue_id, rows = cur.fetchall()[2]
+    queue_id, rows = cur.fetchall()[0]
     cur.close()
     connection.close()
     decoded_json = json.loads(rows)
@@ -19,6 +19,7 @@ def put_data(queue_id, data):
     connection = MySQLdb.connect(host = "localhost", db = "jphacks", user = "jphacks", passwd = "jphacks")
     cur = connection.cursor()
     results = cur.execute("INSERT into results(queue_id, json, created_at) values(%s, %s, UNIX_TIMESTAMP())", (queue_id, encoded_json))
+    results = cur.execute("UPDATE queues SET state=2 WHERE id = %s "%(queue_id))
     connection.commit()
     cur.close()
     connection.close()
