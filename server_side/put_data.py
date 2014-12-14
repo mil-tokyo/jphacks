@@ -1,8 +1,6 @@
 import time
 import MySQLdb
 from objects import Objects
-from PIL import Image
-from PIL import ImageOps
 import json
 
 def get_data():
@@ -24,6 +22,7 @@ def put_data(queue_id, data):
     results = cur.execute("INSERT into results(queue_id, json, created_at) values(%s, %s, UNIX_TIMESTAMP())", (queue_id, encoded_json))
     results = cur.execute("UPDATE queues SET state=2 WHERE id = %s "%(queue_id))
     connection.commit()
+    print "execute INSERT into results(queue_id, json, created_at) values(%s, %s, UNIX_TIMESTAMP())"%(queue_id, encoded_json)
     cur.close()
     connection.close()
     
@@ -46,7 +45,7 @@ def main():
         try:
             objects = Objects(decoded_json)
             results = objects.calculate()
-        except:
+        except IndexError, e:
             print "ERROR"
             write_error(queue_id)
             continue
