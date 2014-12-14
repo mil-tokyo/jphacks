@@ -106,23 +106,24 @@ class Visualizer(Object):
         #else:
         #    self.label = self.model.predict(self.data)
          #   mode = "unsupervised"
-
         plt.clf()
         self.plot_data(mode)
+        self.plot_func(mode)
+        plt.savefig(self.image_source)
+        return {"name": self.name, "type": self.type, "data" : self.data.tolist(), "img_src" : self.image_source}, False
 
-                
+
+    def plot_func(self, mode):
         """ plot fucntions """
         if mode == "regression":
             axis_x = np.arange(-1, 2, 0.1)
             axis_y = [self.model.decision_function(np.array([x])) for x in axis_x]
             plt.plot(axis_x, axis_y, "-"+self.colors_list[-1])
-          
+
         elif mode == "classification":
             axis_x = np.arange(-10, 10)
             axis_y = -(self.model.intercept_[0] + self.model.coef_[0, 0] * axis_x) / self.model.coef_[0, 1]
-            plt.plot(axis_x, axis_y, "-"+self.colors_list[n_labels])
-        plt.savefig(self.image_source)
-        return {"data" : self.data.tolist(), "img_src" : self.image_source}, False
+            plt.plot(axis_x, axis_y, "-"+self.colors_list[-1])
 
     def plot_data(self, mode):
         """plot data """
@@ -149,31 +150,3 @@ class Data(Object):
             
     def calculate(self, input_data):
         return {"data": self.data}, self.output
-
-if __name__ == "__main__":
-    
-    decoded_json = [{'type' : 'data',
-                    'name' : 'source_kane',
-                    'input' : '',
-                    'output' : 'k-means_kane',
-                    'data' : '[[0, 0.1], [0.01, 0.01], [-0.01, -0.01], [0, 0.1],[1.11, 0.99], [0.99, 0.99],[1, 1.1], [1.1, 1]]' 
-                    },
-                    {'type' : 'model',
-                    'name' : 'k-means_kane',
-                    'input' : 'source_kane',
-                    'output' : 'vis_kane',
-                    'model_type' : 'k-means'
-                    },
-                    {'type' : 'visualize',
-                    'name' : 'vis_kane',
-                    'input' : 'k-means_kane',
-                    'output' : ''
-                    }
-                    ]
-
-    print decoded_json
-    a= Objects(decoded_json)
-    a.calculate()
-
-
-        
