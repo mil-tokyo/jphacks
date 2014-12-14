@@ -77,7 +77,10 @@ class Model(Object):
         if self.model_class == "unsupervised":
             self.model.fit(input_data["data"][:, 1:])
         else:
+            print input_data["data"][:, 0]
+            print input_data["data"][:, 1:]
             self.model.fit(input_data["data"][:, 1:], input_data["data"][:, 0])
+            print self.model
             
         return {"data": input_data["data"], "model" : {"model_params" : self.model, "model_class" : self.model_class}}, self.output
 
@@ -93,7 +96,7 @@ class Visualizer(Object):
         mode = input_data["model"]["model_class"]
         print type(input_data["data"])
         self.data = input_data["data"][:, 1:]
-        self.label = input_data["data"][:, 1]
+        self.label = input_data["data"][:, 0]
         if mode == "unsupervised":
             self.label = self.model.predict(self.data)
         
@@ -116,8 +119,9 @@ class Visualizer(Object):
     def plot_func(self, mode):
         """ plot fucntions """
         if mode == "regression":
-            axis_x = np.arange(-1, 2, 0.1)
+            axis_x = np.arange(self.plot_range[0], self.plot_range[1])
             axis_y = [self.model.decision_function(np.array([x])) for x in axis_x]
+            print axis_y
             plt.plot(axis_x, axis_y, "-"+self.colors_list[-1])
 
         elif mode == "classification":
@@ -128,15 +132,18 @@ class Visualizer(Object):
     def plot_data(self, mode):
         """plot data """
         n_labels = max(self.label) + 1
-        if mode == "classification" or mode == "unsupervised":
-            plt.axis(self.plot_range)
+        plt.axis(self.plot_range)
+        if mode == "classification":
             for l in range(n_labels):
                 x_plot = self.data[self.label == l, :]
                 plt.plot(x_plot[:, 0], x_plot[:, 1], "o"+self.colors_list[l])
+        elif mode == "unsupervised":
             plt.legend(range(n_labels), "lower right")
-
+            
         else:
-            plt.plot(self.data, self.label, "o")
+            print self.data[:, 0]
+            print self.label
+            plt.plot(self.data[:, 0], self.label, "o")
 
         
 class Data(Object):
