@@ -27,7 +27,7 @@ class Objects():
             """initialize"""
             input_data = None
             output_obj_name = True
-
+            
             while 1:
                 result, output_obj_name = obj.calculate(input_data)
                 """ if calculation reach the end module """
@@ -45,18 +45,26 @@ class Object(object):
     def __init__(self, json_object):
         self.type = json_object["type"]
         self.name = json_object["name"]
-        self.input = json_object["input"]
-        self.output = json_object["output"]
+        try:
+            self.input = json_object["input"]
+        except KeyError:
+            self.input = None
+
+        try:
+            self.output = json_object["output"]
+        except KeyError:
+            self.output = None
 
     def __str__(self):
         return "{}:{},\n{}:{},\n{}:{}"\
           .format("name", self.name, "input", self.input, "output", self.output)
         
-          
+model_class_dict = {"KMeans" : "unsupervised", "SVC" : "classification", "LinearRegression" : "regression"}      
 class Model(Object):
     def __init__(self, json_object):
         super(Model, self).__init__(json_object)
-        self.model_type = json_object["model_type"]
+        self.model_type = str(json_object["model_type"])
+        self.model_class = model_class_dict[self.model_type]
         self.params = json_object["params"]
         for k, v in self.params.items():
             if type(v) == unicode:
@@ -65,14 +73,13 @@ class Model(Object):
         self.model = eval(str(self.model_type)+"(**self.params)")
         
     def calculate(self, input_data):
-        if input_data["label"] ==None:
-            self.model.fit(input_data["data"])
+    #        if input_data["label"] is None:
+        if self.model_class == "unsupervised":
+            self.model.fit(input_data["data"][:, 1:])
         else:
-            print input_data["data"].shape
-            print input_data["label"].shape
-            self.model.fit(input_data["data"], input_data["label"])
+            self.model.fit(input_data["data"][:, 1:], input_data["data"][:, 0])
             
-        return {"data": input_data, "model" : self.model}, self.output
+        return {"data": input_data["data"], "model" : {"model_params" : self.model, "model_class" : self.model_class}}, self.output
 
 class Visualizer(Object):
     def __init__(self, json_object):
@@ -82,33 +89,29 @@ class Visualizer(Object):
         self.image_source = "./log/{}.png".format(self.name)
                 
     def calculate(self, input_data):
-        self.model = input_data["model"]
-        self.data = input_data["data"]["data"]
-        if input_data["data"]["label"] != None:
-            self.label = input_data["data"]["label"]
-            print self.label
-            if type(self.label[0]) == np.int64:
-                mode = "classification"
-            else:
-                mode = "regression"
-        else:
+        self.model = input_data["model"]["model_params"]
+        mode = input_data["model"]["model_class"]
+        print type(input_data["data"])
+        self.data = input_data["data"][:, 1:]
+        self.label = input_data["data"][:, 1]
+        if mode == "unsupervised":
             self.label = self.model.predict(self.data)
-            mode = "unsupervised"
+        
+        #self.label = input_data["data"]["label"]
+        #print self.label
+         #   if type(self.label[0]) == np.int64:
+         #       mode = "classification"
+         #   else:
+         #       mode = "regression"
+        #else:
+        #    self.label = self.model.predict(self.data)
+         #   mode = "unsupervised"
 
-        n_labels = max(self.label) + 1
-        """plot data """
-        if mode == "classification" or mode == "unsupervised":
-            plt.axis(self.plot_range)
-            for l in range(n_labels):
-                x_plot = self.data[self.label == l, :]
-                plt.plot(x_plot[:, 0], x_plot[:, 1], "o"+self.colors_list[l])
-            plt.legend(range(n_labels), "lower right")
+        plt.clf()
+        self.plot_data(mode)
 
-        else:
-            plt.plot(self.data, self.label, "o")
-
-
-        """ prot fucntions """
+                
+        """ plot fucntions """
         if mode == "regression":
             axis_x = np.arange(-1, 2, 0.1)
             axis_y = [self.model.decision_function(np.array([x])) for x in axis_x]
@@ -120,19 +123,32 @@ class Visualizer(Object):
             plt.plot(axis_x, axis_y, "-"+self.colors_list[n_labels])
         plt.savefig(self.image_source)
         return {"data" : self.data.tolist(), "img_src" : self.image_source}, False
+
+    def plot_data(self, mode):
+        """plot data """
+        n_labels = max(self.label) + 1
+        if mode == "classification" or mode == "unsupervised":
+            plt.axis(self.plot_range)
+            for l in range(n_labels):
+                x_plot = self.data[self.label == l, :]
+                plt.plot(x_plot[:, 0], x_plot[:, 1], "o"+self.colors_list[l])
+            plt.legend(range(n_labels), "lower right")
+
+        else:
+            plt.plot(self.data, self.label, "o")
+
         
 class Data(Object):
     def __init__(self, json_object):
         super(Data, self).__init__(json_object)
-        print json_object["data"]["data"]
         self.data = np.array(json_object["data"]["data"])
-        try:
-            self.label = np.array(json_object["data"]["label"])
-        except KeyError:
-            self.label = None
+ #       try:
+#        self.label = np.array(json_object["data"]["label"])
+#        except KeyError:
+#            self.label = None
             
     def calculate(self, input_data):
-        return {"data": self.data, "label": self.label}, self.output
+        return {"data": self.data}, self.output
 
 if __name__ == "__main__":
     
