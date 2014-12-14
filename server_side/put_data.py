@@ -41,11 +41,10 @@ def main():
         except:
             time.sleep(0.5)
             continue
-        
         try:
-            objects = Objects(decoded_json)
+            objects = Objects(queue_id, decoded_json)
             results = objects.calculate()
-        except:
+        except IndexError:
             print "ERROR"
             write_error(queue_id)
             continue
