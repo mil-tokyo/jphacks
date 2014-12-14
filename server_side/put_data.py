@@ -1,6 +1,8 @@
 import time
 import MySQLdb
 from objects import Objects
+from PIL import Image
+from PIL import ImageOps
 import json
 
 def get_data():
@@ -29,6 +31,7 @@ def write_error(queue_id):
     connection = MySQLdb.connect(host = "localhost", db = "jphacks", user = "jphacks", passwd = "jphacks")
     cur = connection.cursor()
     results = cur.execute("UPDATE queues SET state=10 WHERE id = %s "%(queue_id))
+    connection.commit()
     cur.close()
     connection.close()
     
@@ -46,6 +49,7 @@ def main():
         except:
             print "ERROR"
             write_error(queue_id)
+            continue
         put_data(queue_id, results)
     
 if __name__ == "__main__":
