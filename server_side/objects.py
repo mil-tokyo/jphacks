@@ -133,11 +133,10 @@ class Visualizer(Object):
         """plot data """
         n_labels = int(max(self.label)) + 1
         #plt.axis(self.plot_range)
-        if mode == "classification":
+        if mode == "classification" or mode == "unsupervised":
             for l in range(n_labels):
                 x_plot = self.data[self.label == l, :]
                 plt.plot(x_plot[:, 0], x_plot[:, 1], "o"+self.colors_list[l])
-        elif mode == "unsupervised":
             plt.legend(range(n_labels), "lower right")
             
         else:
