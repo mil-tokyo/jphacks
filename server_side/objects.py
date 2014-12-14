@@ -1,6 +1,10 @@
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
+from PIL import ImageOps
+from skimage.feature import hog
+from sklearn.externals import joblib
 from sklearn.cluster import *
 from sklearn.linear_model import *
 from sklearn.svm import *
@@ -21,7 +25,7 @@ class Objects():
              
     def calculate(self):
         """where calculation will start"""
-        start_obj_list = [obj for obj in self.objects_dict.values() if obj.type == "Data"]
+        start_obj_list = [obj for obj in self.objects_dict.values() if obj.type == "Data" or obj.type == "Extractor"]
         results = []
         for obj in start_obj_list:
             """initialize"""
@@ -45,29 +49,13 @@ class Object(object):
     def __init__(self, json_object):
         self.type = json_object["type"]
         self.name = json_object["name"]
-        try:
-            self.input = json_object["input"]
-        except KeyError:
-            self.input = None
-
-        try:
-            self.output = json_object["output"]
-        except KeyError:
-            self.output = None
+        self.input = json_object.get("input", None)
+        self.output = json_object.get("output", None)
 
     def __str__(self):
         return "{}:{},\n{}:{},\n{}:{}"\
           .format("name", self.name, "input", self.input, "output", self.output)
 
-
-# class Extractor(Object):
-#     def __init__(self, json_object):
-#         super(Model, self).__init__(json_object)
-#         self.extractor = "Hog"
-
-#     def calculate(self, input_data):
-#         input_data[]
-        
         
 model_class_dict = {"KMeans" : "unsupervised", "SVC" : "classification", "LinearSVC" : "classification_demo", "LinearRegression" : "regression"}      
 class Model(Object):
@@ -85,9 +73,13 @@ class Model(Object):
     def calculate(self, input_data):
         if self.model_class == "unsupervised":
             self.model.fit(input_data["data"][:, 1:])
-        elif self.model_class == "classification_demo":
-            pass
             
+        elif self.model_class == "classification_demo":
+            self.model = joblib.load('./model/linSVM.pkl')
+            class_name = ['buddha', 'snoopy', 'water_lilly', 'camera', 'euphonium']
+            pred_ind = self.model.predict(input_data["data"])
+            pred_class = class_name[int(pred_ind[0])]
+            return {"name": self.name, "type": self.type, "predict_class" : pred_class }, False
         else:
             print input_data["data"][:, 0]
             print input_data["data"][:, 1:]
@@ -148,16 +140,29 @@ class Visualizer(Object):
             print self.data[:, 0]
             print self.label
             plt.plot(self.data[:, 0], self.label, "o")
-
         
 class Data(Object):
     def __init__(self, json_object):
         super(Data, self).__init__(json_object)
-        self.data = np.array(json_object["data"]["data"])
- #       try:
-#        self.label = np.array(json_object["data"]["label"])
-#        except KeyError:
-#            self.label = None
-            
+        if type(json_object["data"]["data"]) == list:
+            self.source_type = "array"
+            self.data = np.array(json_object["data"]["data"])
+        else:
+            self.source_type = "image_path"
+            self.img_src = json_object["data"]["data"]
+            im = Image.open(self.img_src)
+            im = ImageOps.grayscale(im)
+            self.image = np.array(im.resize((200,300)))
+            self.extractor = "Hog"
+
     def calculate(self, input_data):
-        return {"data": self.data}, self.output
+        if self.source_type == "array":
+            return {"data": self.data}, self.output
+
+        if self.source_type == "image_path":
+            self.feature = hog(self.image, orientations=8, pixels_per_cell=(16, 16),\
+                        cells_per_block=(1, 1), visualise=False)
+            return {"data" : self.feature}, self.output
+    
+        
+
