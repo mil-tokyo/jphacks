@@ -1,0 +1,6 @@
+SVC svm
+LinearRegression linear_model
+NearestNeighbors neighbors
+BayesianRidge linear_model
+KMeans cluster
+
