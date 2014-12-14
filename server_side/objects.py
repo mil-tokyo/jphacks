@@ -73,7 +73,6 @@ class Model(Object):
         self.model = eval(str(self.model_type)+"(**self.params)")
         
     def calculate(self, input_data):
-    #        if input_data["label"] is None:
         if self.model_class == "unsupervised":
             self.model.fit(input_data["data"][:, 1:])
         else:
@@ -99,16 +98,7 @@ class Visualizer(Object):
         self.label = input_data["data"][:, 0]
         if mode == "unsupervised":
             self.label = self.model.predict(self.data)
-        
-        #self.label = input_data["data"]["label"]
-        #print self.label
-         #   if type(self.label[0]) == np.int64:
-         #       mode = "classification"
-         #   else:
-         #       mode = "regression"
-        #else:
-        #    self.label = self.model.predict(self.data)
-         #   mode = "unsupervised"
+            
         plt.clf()
         self.plot_data(mode)
         self.plot_func(mode)
@@ -118,14 +108,16 @@ class Visualizer(Object):
 
     def plot_func(self, mode):
         """ plot fucntions """
+        x_min, x_max = min(self.data[:, 0]), max(self.data[:, 0])
+        
         if mode == "regression":
-            axis_x = np.arange(self.plot_range[0], self.plot_range[1])
+            axis_x = np.arange(x_min, x_max)
             axis_y = [self.model.decision_function(np.array([x])) for x in axis_x]
             print axis_y
             plt.plot(axis_x, axis_y, "-"+self.colors_list[-1])
 
         elif mode == "classification":
-            axis_x = np.arange(-10, 10)
+            axis_x = np.arange(x_min, x_max)
             axis_y = -(self.model.intercept_[0] + self.model.coef_[0, 0] * axis_x) / self.model.coef_[0, 1]
             plt.plot(axis_x, axis_y, "-"+self.colors_list[-1])
 
@@ -133,11 +125,10 @@ class Visualizer(Object):
         """plot data """
         n_labels = int(max(self.label)) + 1
         #plt.axis(self.plot_range)
-        if mode == "classification":
+        if mode == "classification" or mode == "unsupervised":
             for l in range(n_labels):
                 x_plot = self.data[self.label == l, :]
                 plt.plot(x_plot[:, 0], x_plot[:, 1], "o"+self.colors_list[l])
-        elif mode == "unsupervised":
             plt.legend(range(n_labels), "lower right")
             
         else:
