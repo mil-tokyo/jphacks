@@ -76,15 +76,12 @@ class Model(Object):
             
         elif self.model_class == "classification_demo":
             self.model = joblib.load('./model/linSVM.pkl')
-            class_name = ['buddha', 'snoopy', 'water_lilly', 'camera', 'euphonium']
+            class_name = ['buddha', 'camera', 'euphonium', 'snoopy', 'water_lilly']
             pred_ind = self.model.predict(input_data["data"])
             pred_class = class_name[int(pred_ind[0])]
             return {"name": self.name, "type": self.type, "predict_class" : pred_class }, False
         else:
-            print input_data["data"][:, 0]
-            print input_data["data"][:, 1:]
             self.model.fit(input_data["data"][:, 1:], input_data["data"][:, 0])
-            print self.model
             
         return {"data": input_data["data"], "model" : {"model_params" : self.model, "model_class" : self.model_class}}, self.output
 
@@ -98,7 +95,6 @@ class Visualizer(Object):
     def calculate(self, input_data):
         self.model = input_data["model"]["model_params"]
         mode = input_data["model"]["model_class"]
-        print type(input_data["data"])
         self.data = input_data["data"][:, 1:]
         self.label = input_data["data"][:, 0]
         if mode == "unsupervised":
@@ -118,7 +114,6 @@ class Visualizer(Object):
         if mode == "regression":
             axis_x = np.arange(x_min, x_max)
             axis_y = [self.model.decision_function(np.array([x])) for x in axis_x]
-            print axis_y
             plt.plot(axis_x, axis_y, "-"+self.colors_list[-1])
 
         elif mode == "classification":
@@ -137,8 +132,6 @@ class Visualizer(Object):
             plt.legend(range(n_labels), "lower right")
             
         else:
-            print self.data[:, 0]
-            print self.label
             plt.plot(self.data[:, 0], self.label, "o")
         
 class Data(Object):
@@ -152,8 +145,8 @@ class Data(Object):
             self.img_src = json_object["data"]["data"]
             im = Image.open(self.img_src)
             im = ImageOps.grayscale(im)
-            self.image = np.array(im.resize((200,300)))
-            self.extractor = "Hog"
+            self.image = np.array(im.resize((200, 300)))
+            self.extractor_type = "Hog"
 
     def calculate(self, input_data):
         if self.source_type == "array":

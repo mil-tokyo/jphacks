@@ -45,7 +45,7 @@ def main():
         try:
             objects = Objects(decoded_json)
             results = objects.calculate()
-        except IndexError, e:
+        except:
             print "ERROR"
             write_error(queue_id)
             continue
