@@ -1,5 +1,5 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 def sample_kmeans():
     priors = np.random.normal(loc=[0, 0], size=(5, 2), scale=0.8)
@@ -24,4 +24,16 @@ def sample_svm():
     f.close()
 
 
+def sample_regression():
+    x=np.arange(0, 10, 0.2)
+    y = x * 0.5 + 1
+    noise = np.random.normal(size=(x.shape[0]), scale = 0.4)
+    y += noise
+    f=open("sample_kmeans.csv","w")
+    for i in range(x.shape[0]):
+        f.write("{},{}\n".format(y[i], x[i]))
+    f.close()
+
+    
+sample_regression()
 sample_svm()
