@@ -58,8 +58,18 @@ class Object(object):
     def __str__(self):
         return "{}:{},\n{}:{},\n{}:{}"\
           .format("name", self.name, "input", self.input, "output", self.output)
+
+
+class Extractor(Object):
+    def __init__(self, json_object):
+        super(Model, self).__init__(json_object)
+        self.extractor = "Hog"
+
+    def calculate(self, input_data):
+        input_data[]
         
-model_class_dict = {"KMeans" : "unsupervised", "SVC" : "classification", "LinearRegression" : "regression"}      
+        
+model_class_dict = {"KMeans" : "unsupervised", "SVC" : "classification", "LinearSVC" : "classification_demo", "LinearRegression" : "regression"}      
 class Model(Object):
     def __init__(self, json_object):
         super(Model, self).__init__(json_object)
@@ -75,6 +85,9 @@ class Model(Object):
     def calculate(self, input_data):
         if self.model_class == "unsupervised":
             self.model.fit(input_data["data"][:, 1:])
+        elif self.model_class == "classification_demo":
+            
+            
         else:
             print input_data["data"][:, 0]
             print input_data["data"][:, 1:]
