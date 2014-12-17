@@ -68,13 +68,12 @@ class Model(Object):
         for k, v in self.params.items():
             if type(v) == unicode:
                 self.params[k] = str(v)
-                
         self.model = eval(str(self.model_type)+"(**self.params)")
         
     def calculate(self, input_data):
         if self.model_class == "unsupervised":
             self.model.fit(input_data["data"][:, 1:])
-            
+      
         elif self.model_class == "classification_demo":
             self.model = joblib.load('./model/linSVM.pkl')
             class_name = ['buddha', 'camera', 'euphonium', 'snoopy', 'water_lilly']
@@ -83,7 +82,6 @@ class Model(Object):
             return {"name": self.name, "type": self.type, "predict_class" : pred_class }, False
         else:
             self.model.fit(input_data["data"][:, 1:], input_data["data"][:, 0])
-            
         return {"data": input_data["data"], "model" : {"model_params" : self.model, "model_class" : self.model_class}}, self.output
 
 class Visualizer(Object):
@@ -93,8 +91,16 @@ class Visualizer(Object):
         self.image_source = "./log/{}_{}.png".format(self.queue_id, self.name)
                 
     def calculate(self, input_data):
-        self.model = input_data["model"]["model_params"]
-        mode = input_data["model"]["model_class"]
+        self.model = input_data.get("model", {"model_params" : False})["model_params"]
+        mode = input_data.get("model", {"model_class" : False})["model_class"]
+        if mode:
+            self.is_plot_data = True
+            self.is_plot_func = True
+        else:
+            self.is_plot_data = True
+            self.is_plot_func = False
+            mode = 'data'
+            
         self.data = input_data["data"][:, 1:]
         self.label = input_data["data"][:, 0]
         if mode == "unsupervised":
@@ -104,8 +110,12 @@ class Visualizer(Object):
         plt.title(self.model.__class__.__name__)
         plt.xlabel("X-axis")
         plt.ylabel("Y-axis")
-        self.plot_data(mode)
-        self.plot_func(mode)
+        
+        if self.is_plot_data:
+            self.plot_data(mode)
+        if self.is_plot_func:
+            self.plot_func(mode)
+            
         plt.savefig(self.image_source)
         return {"name": self.name, "type": self.type, "data" : self.data.tolist(), "img_src" : self.image_source}, False
 
