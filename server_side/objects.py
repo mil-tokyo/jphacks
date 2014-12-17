@@ -147,8 +147,13 @@ class Visualizer(Object):
             plt.legend(range(n_labels), "lower right")
             
         else:
-            plt.plot(self.data[:, 0], self.label, "o")
-        
+            if self.data.shape[1] == 1:
+                plt.plot(self.data[:, 0], self.label, "o")
+            elif self.data.shape[1] == 2:
+                plt.plot(self.data[:, 0], self.data[:, 1], "o")
+            else:
+                raise ValueError, "dimension of data must be 1 or 2 for visualization"
+            
 class Data(Object):
     def __init__(self, queue_id, json_object):
         super(Data, self).__init__(queue_id, json_object)
