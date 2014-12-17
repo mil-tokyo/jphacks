@@ -58,7 +58,7 @@ class Object(object):
           .format("name", self.name, "input", self.input, "output", self.output)
 
         
-model_class_dict = {"KMeans" : "unsupervised", "SVC" : "classification", "LinearSVC" : "classification_demo", "LinearRegression" : "regression"}      
+model_class_dict = {"KMeans" : "unsupervised", "SVC" : "classification", "LinearSVC" : "image", "LinearRegression" : "regression"}      
 class Model(Object):
     def __init__(self, queue_id, json_object):
         super(Model, self).__init__(queue_id, json_object)
@@ -74,12 +74,9 @@ class Model(Object):
         if self.model_class == "unsupervised":
             self.model.fit(input_data["data"][:, 1:])
       
-        elif self.model_class == "classification_demo":
+        elif self.model_class == "image":
             self.model = joblib.load('./model/linSVM.pkl')
-            class_name = ['buddha', 'camera', 'euphonium', 'snoopy', 'water_lilly']
-            pred_ind = self.model.predict(input_data["data"])
-            pred_class = class_name[int(pred_ind[0])]
-            return {"name": self.name, "type": self.type, "predict_class" : pred_class }, False
+            #return {"name": self.name, "type": self.type, "predict_class" : pred_class }, False
         else:
             self.model.fit(input_data["data"][:, 1:], input_data["data"][:, 0])
         return {"data": input_data["data"], "model" : {"model_params" : self.model, "model_class" : self.model_class}}, self.output
@@ -94,8 +91,14 @@ class Visualizer(Object):
         self.model = input_data.get("model", {"model_params" : False})["model_params"]
         mode = input_data.get("model", {"model_class" : False})["model_class"]
         if mode:
-            self.is_plot_data = True
-            self.is_plot_func = True
+            if mode == "image":
+                class_name = ['buddha', 'camera', 'euphonium', 'snoopy', 'water_lilly']
+                pred_ind = self.model.predict(input_data["data"])
+                pred_class = class_name[int(pred_ind[0])]
+                return {"name": self.name, "type": self.type, "predict_class" : pred_class }, False
+            else:
+                self.is_plot_data = True
+                self.is_plot_func = True
         else:
             self.is_plot_data = True
             self.is_plot_func = False
@@ -103,6 +106,7 @@ class Visualizer(Object):
             
         self.data = input_data["data"][:, 1:]
         self.label = input_data["data"][:, 0]
+        
         if mode == "unsupervised":
             self.label = self.model.predict(self.data)
             
