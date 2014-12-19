@@ -66,7 +66,7 @@ class Model(Object):
         self.model_type = str(json_object["model_type"])
         if self.read_model_path:
             self.model_class = json_object.get("model", {"model_class" : False})["model_class"]
-            return 0
+            return None
         self.model_class = model_class_dict[self.model_type]
         self.params = json_object.get("params", False)
         for k, v in self.params.items():
