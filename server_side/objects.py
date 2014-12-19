@@ -62,15 +62,24 @@ model_class_dict = {"KMeans" : "unsupervised", "SVC" : "classification", "Linear
 class Model(Object):
     def __init__(self, queue_id, json_object):
         super(Model, self).__init__(queue_id, json_object)
+        self.read_model_path = json_object.get("model_filename", False)
+        if self.read_model_path:
+            self.model_type = str(json_object["model_type"])
+            self.model_class = json_object["model_class"]
+            return 0
         self.model_type = str(json_object["model_type"])
         self.model_class = model_class_dict[self.model_type]
-        self.params = json_object["params"]
+        self.params = json_object.get("params", False)
         for k, v in self.params.items():
             if type(v) == unicode:
                 self.params[k] = str(v)
         self.model = eval(str(self.model_type)+"(**self.params)")
+
         
     def calculate(self, input_data):
+        if self.read_model_path:
+            return {"name" : self.name, "type" : self.type, "model_type" : self.model_type, "data": input_data["data"], "model" : {"model_filename" : self.read_model_path, "model_class" : self.model_class}}, self.output
+            
         if self.model_class == "unsupervised":
             self.model.fit(input_data["data"][:, 1:])
       
@@ -81,7 +90,7 @@ class Model(Object):
 
         model_filename = "./model/{}_{}.pkl".format(self.queue_id, self.model_type)
         joblib.dump(self.model, model_filename)
-        return {"data": input_data["data"], "model" : {"model_filename" : model_filename, "model_class" : self.model_class}}, self.output
+        return {"name" : self.name, "type" : self.type , "model_type" : self.model_type, "data": input_data["data"], "model" : {"model_filename" : model_filename, "model_class" : self.model_class}}, self.output
 
 class Visualizer(Object):
     def __init__(self, queue_id, json_object):
@@ -173,12 +182,12 @@ class Data(Object):
 
     def calculate(self, input_data):
         if self.source_type == "array":
-            return {"data": self.data}, self.output
+            return {"name" : self.name, "type" : self.type, "data": self.data}, self.output
 
         if self.source_type == "image_path":
             self.feature = hog(self.image, orientations=8, pixels_per_cell=(16, 16),\
                         cells_per_block=(1, 1), visualise=False)
-            return {"data" : self.feature}, self.output
+            return {"name" : self.name, "type" : self.type, "data" : self.feature}, self.output
     
         
 
