@@ -15,6 +15,8 @@ def get_data():
     return queue_id, decoded_json
 
 def put_data(queue_id, data):
+    for d in data:
+        d["data"] = d["data"].tolist()
     encoded_json = json.dumps(data)
     print type(encoded_json)
     connection = MySQLdb.connect(host = "localhost", db = "jphacks", user = "jphacks", passwd = "jphacks")
