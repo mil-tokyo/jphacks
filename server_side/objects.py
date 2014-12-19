@@ -77,7 +77,7 @@ class Model(Object):
         
     def calculate(self, input_data):
         if self.read_model_path:
-            return {"name" : self.name, "type" : self.type, "model_type" : self.model_type, "data": input_data["data"], "model" : {"model_filename" : self.read_model_path, "model_class" : self.model_class}}, self.output
+            return {"name" : self.name, "type" : self.type, "model_type" : self.model_type, "data": input_data["data"], "model" : {"model_filename" : self.read_model_path, "model_class" : self.model_class}, "is_read_image" : True}, self.output
             
         if self.model_class == "unsupervised":
             self.model.fit(input_data["data"][:, 1:])
@@ -102,6 +102,7 @@ class Visualizer(Object):
         self.model = joblib.load(model_filename) if model_filename else "Data"
         model_type = input_data.get("model_type", False)
         mode = input_data.get("model", {"model_class" : False})["model_class"]
+        is_read_image = input_data.get("is_read_image", False)
         if mode:
             if mode == "image":
                 class_name = ['buddha', 'camera', 'euphonium', 'snoopy', 'water_lilly']
@@ -119,7 +120,7 @@ class Visualizer(Object):
         self.data = input_data["data"][:, 1:]
         self.label = input_data["data"][:, 0]
         
-        if mode == "unsupervised":
+        if mode == "unsupervised" or is_read_image:
             self.label = self.model.predict(self.data)
             
         plt.clf()
