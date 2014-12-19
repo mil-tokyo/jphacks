@@ -134,7 +134,7 @@ class Visualizer(Object):
             self.plot_func(mode)
             
         plt.savefig(self.image_source)
-        return {"name": self.name, "type": self.type, "data" : self.data, "img_src" : self.image_source, "model" : {"model_filename" : model_filename, "model_type" : model_type, "model_class" : mode}}, False
+        return {"name": self.name, "type": self.type, "data" : self.data, "img_src" : self.image_source, "model_type" : model_type, "model" : {"model_filename" : model_filename, "model_class" : mode}}, False
 
     def plot_func(self, mode):
         """ plot fucntions """
