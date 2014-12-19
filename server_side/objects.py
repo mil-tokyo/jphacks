@@ -62,7 +62,7 @@ model_class_dict = {"KMeans" : "unsupervised", "SVC" : "classification", "Linear
 class Model(Object):
     def __init__(self, queue_id, json_object):
         super(Model, self).__init__(queue_id, json_object)
-        self.read_model_path = json_object.get("model_filename", False)
+        self.read_model_path = json_object.get("model", {"model_filename" : False})["model_filename"]
         if self.read_model_path:
             self.model_type = str(json_object["model_type"])
             self.model_class = json_object["model_class"]
