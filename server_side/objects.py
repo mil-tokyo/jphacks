@@ -101,13 +101,14 @@ class Visualizer(Object):
     def calculate(self, input_data):
         model_filename = input_data.get("model", {"model_filename" : False})["model_filename"]            
         self.model = joblib.load(model_filename) if model_filename else "Data"
+        model_type = input_data.get("model_type", False)
         mode = input_data.get("model", {"model_class" : False})["model_class"]
         if mode:
             if mode == "image":
                 class_name = ['buddha', 'camera', 'euphonium', 'snoopy', 'water_lilly']
                 pred_ind = self.model.predict(input_data["data"])
                 pred_class = class_name[int(pred_ind[0])]
-                return {"name": self.name, "type": self.type, "predict_class" : pred_class }, False
+                return {"data" : input_data["data"], "name": self.name, "type": self.type, "predict_class" : pred_class }, False
             else:
                 self.is_plot_data = True
                 self.is_plot_func = True
@@ -133,7 +134,7 @@ class Visualizer(Object):
             self.plot_func(mode)
             
         plt.savefig(self.image_source)
-        return {"name": self.name, "type": self.type, "data" : self.data, "img_src" : self.image_source}, False
+        return {"name": self.name, "type": self.type, "data" : self.data, "img_src" : self.image_source, "model" : {"model_filename" : model_filename, "model_type" : model_type, "model_class" : mode}}, False
 
     def plot_func(self, mode):
         """ plot fucntions """
