@@ -35,8 +35,8 @@ class Objects():
             while 1:
                 result, output_obj_name = obj.calculate(input_data)
                 """ if calculation reach the end module """
+                results.append(result)
                 if not output_obj_name:
-                    results.append(result)
                     break
                 obj = self.objects_dict[output_obj_name]
                 input_data = result
@@ -99,7 +99,7 @@ class Visualizer(Object):
         self.image_source = "./log/{}_{}.png".format(self.queue_id, self.name)
                 
     def calculate(self, input_data):
-        model_filename = input_data.get("model", {"model_filename" : False})["model_filename"]            
+        model_filename = input_data.get("model", {"model_filename" : False})["model_filename"]
         self.model = joblib.load(model_filename) if model_filename else "Data"
         model_type = input_data.get("model_type", False)
         mode = input_data.get("model", {"model_class" : False})["model_class"]
@@ -134,7 +134,7 @@ class Visualizer(Object):
             self.plot_func(mode)
             
         plt.savefig(self.image_source)
-        return {"name": self.name, "type": self.type, "data" : self.data, "img_src" : self.image_source, "model_type" : model_type, "model" : {"model_filename" : model_filename, "model_class" : mode}}, False
+        return {"name": self.name, "type": self.type, "data" : self.data, "img_src" : self.image_source}, False
 
     def plot_func(self, mode):
         """ plot fucntions """
