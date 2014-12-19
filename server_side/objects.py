@@ -63,11 +63,10 @@ class Model(Object):
     def __init__(self, queue_id, json_object):
         super(Model, self).__init__(queue_id, json_object)
         self.read_model_path = json_object.get("model", {"model_filename" : False})["model_filename"]
-        if self.read_model_path:
-            self.model_type = str(json_object["model_type"])
-            self.model_class = json_object["model_class"]
-            return 0
         self.model_type = str(json_object["model_type"])
+        if self.read_model_path:
+            self.model_class = json_object.get("model", {"model_class" : False})["model_class"]
+            return 0
         self.model_class = model_class_dict[self.model_type]
         self.params = json_object.get("params", False)
         for k, v in self.params.items():
