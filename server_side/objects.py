@@ -31,13 +31,10 @@ class Objects():
             """initialize"""
             input_data = None
             output_obj_name = True
-            i = 0
             
             while 1:
                 result, output_obj_name = obj.calculate(input_data)
                 """ if calculation reach the end module """
-                i+=1
-                print i,"\n\n\n\n\n"
                 results.append(result)
                 if not output_obj_name:
                     break
