@@ -76,10 +76,12 @@ class Model(Object):
       
         elif self.model_class == "image":
             self.model = joblib.load('./model/linSVM.pkl')
-            #return {"name": self.name, "type": self.type, "predict_class" : pred_class }, False
         else:
             self.model.fit(input_data["data"][:, 1:], input_data["data"][:, 0])
-        return {"data": input_data["data"], "model" : {"model_params" : self.model, "model_class" : self.model_class}}, self.output
+
+        model_filename = "./model/{}_{}.pkl".format(self.queue_id, self.model_type)
+        joblib.dump(self.model, model_filename)
+        return {"data": input_data["data"], "model" : {"model_filename" : model_filename, "model_class" : self.model_class}}, self.output
 
 class Visualizer(Object):
     def __init__(self, queue_id, json_object):
@@ -88,7 +90,8 @@ class Visualizer(Object):
         self.image_source = "./log/{}_{}.png".format(self.queue_id, self.name)
                 
     def calculate(self, input_data):
-        self.model = input_data.get("model", {"model_params" : False})["model_params"]
+        model_filename = input_data.get("model", {"model_filename" : False})["model_filename"]            
+        self.model = joblib.load(model_filename) if model_filename else "Data"
         mode = input_data.get("model", {"model_class" : False})["model_class"]
         if mode:
             if mode == "image":
