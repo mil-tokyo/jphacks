@@ -31,10 +31,13 @@ class Objects():
             """initialize"""
             input_data = None
             output_obj_name = True
+            i = 0
             
             while 1:
                 result, output_obj_name = obj.calculate(input_data)
                 """ if calculation reach the end module """
+                i+=1
+                print i,"\n\n\n\n\n"
                 results.append(result)
                 if not output_obj_name:
                     break
@@ -50,8 +53,8 @@ class Object(object):
         self.queue_id = queue_id
         self.type = json_object["type"]
         self.name = json_object["name"]
-        self.input = json_object.get("input", None)
-        self.output = json_object.get("output", None)
+        self.input = json_object.get("input", False)
+        self.output = json_object.get("output", False)
 
     def __str__(self):
         return "{}:{},\n{}:{},\n{}:{}"\
@@ -108,7 +111,7 @@ class Visualizer(Object):
                 class_name = ['buddha', 'camera', 'euphonium', 'snoopy', 'water_lilly']
                 pred_ind = self.model.predict(input_data["data"])
                 pred_class = class_name[int(pred_ind[0])]
-                return {"data" : input_data["data"], "name": self.name, "type": self.type, "predict_class" : pred_class }, False
+                return {"data" : input_data["data"], "name": self.name, "type": self.type, "predict_class" : pred_class }, self.output
             else:
                 self.is_plot_data = True
                 self.is_plot_func = True
@@ -134,7 +137,7 @@ class Visualizer(Object):
             self.plot_func(mode)
             
         plt.savefig(self.image_source)
-        return {"name": self.name, "type": self.type, "data" : self.data, "img_src" : self.image_source}, False
+        return {"name": self.name, "type": self.type, "data" : input_data["data"], "img_src" : self.image_source}, self.output
 
     def plot_func(self, mode):
         """ plot fucntions """
@@ -156,6 +159,7 @@ class Visualizer(Object):
         if mode == "classification" or mode == "unsupervised":
             for l in range(n_labels):
                 x_plot = self.data[self.label == l, :]
+                print x_plot
                 plt.plot(x_plot[:, 0], x_plot[:, 1], "o"+self.colors_list[l])
             plt.legend(range(n_labels), "lower right")
             
