@@ -31,18 +31,19 @@ class Objects():
             """initialize"""
             input_data = None
             output_obj_name = True
-            i = 0
-            
+            trial = 0
             while 1:
                 result, output_obj_name = obj.calculate(input_data)
                 """ if calculation reach the end module """
-                i+=1
-                print i,"\n\n\n\n\n"
                 results.append(result)
                 if not output_obj_name:
                     break
                 obj = self.objects_dict[output_obj_name]
                 input_data = result
+                trial += 1
+
+                if trial > 50:
+                    raise ValueError("loop was detected")
 
         return results
     def __str__(self):
@@ -123,7 +124,7 @@ class Visualizer(Object):
         self.data = input_data["data"][:, 1:]
         self.label = input_data["data"][:, 0]
         
-        if mode == "unsupervised" or is_read_image:
+        if mode == "unsupervised" or (is_read_image and mode != "regression"):
             self.label = self.model.predict(self.data)
             
         plt.clf()
@@ -159,7 +160,6 @@ class Visualizer(Object):
         if mode == "classification" or mode == "unsupervised":
             for l in range(n_labels):
                 x_plot = self.data[self.label == l, :]
-                print x_plot
                 plt.plot(x_plot[:, 0], x_plot[:, 1], "o"+self.colors_list[l])
             plt.legend(range(n_labels), "lower right")
             
