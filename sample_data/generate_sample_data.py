@@ -26,7 +26,7 @@ def sample_svm():
 
 def sample_regression():
     x=np.arange(140, 180, 1)
-    y = x * 0.5 + 40
+    y = (x - 140) * 0.5 + 40
     noise = np.random.normal(size=(x.shape[0]), scale = 5)
     y += noise
     f=open("sample_regression.csv","w")
